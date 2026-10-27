@@ -14,11 +14,17 @@
     </section>
     <section class="panels">
       <article class="panel"><div class="panel-title"><span class="number lime">01</span><h2>Potong Biasa</h2></div><label for="cutCount">Jumlah potong</label><div class="counter"><button id="cutMinus" aria-label="Kurangi potong">−</button><input id="cutCount" type="number" min="0" inputmode="numeric" value="0"><button id="cutPlus" aria-label="Tambah potong">+</button></div><div class="commission"><span>Komisi potong biasa</span><strong id="cutCommission">Rp0</strong><small>1–5: Rp5.000 · 6–9: Rp7.500 · 10+: Rp10.000 per potong</small></div></article>
-      <article class="panel"><div class="panel-title"><span class="number blue">02</span><h2>Menu Servis</h2></div><label for="serviceType">Jenis servis</label><select id="serviceType"><option value="Hairspa">Hairspa</option><option value="Premium">Premium</option><option value="Clasiy">Clasiy</option><option value="Royal">Royal</option><option value="Perming">Perming</option><option value="Smoothing">Smoothing</option></select><label for="serviceCount">Jumlah pelanggan</label><div class="counter"><button id="serviceMinus" aria-label="Kurangi pelanggan">−</button><input id="serviceCount" type="number" min="0" inputmode="numeric" value="0"><button id="servicePlus" aria-label="Tambah pelanggan">+</button></div><div class="commission"><span id="serviceCommissionLabel">Komisi Hairspa</span><strong id="serviceCommission">Rp0</strong><small id="serviceRate">Tarif Rp5.000 per pelanggan</small></div></article>
+      <article class="panel"><div class="panel-title"><span class="number blue">02</span><h2>Menu Servis</h2></div><label>Jenis servis</label><button id="servicePicker" class="service-picker" type="button" aria-haspopup="dialog" aria-expanded="false"><span id="selectedServiceIcon">✦</span><span id="selectedServiceName">Hairspa</span><span class="picker-chevron">⌄</span></button><label for="serviceCount">Jumlah pelanggan</label><div class="counter"><button id="serviceMinus" aria-label="Kurangi pelanggan">−</button><input id="serviceCount" type="number" min="0" inputmode="numeric" value="0"><button id="servicePlus" aria-label="Tambah pelanggan">+</button></div><div class="commission"><span id="serviceCommissionLabel">Komisi Hairspa</span><strong id="serviceCommission">Rp0</strong><small id="serviceRate">Tarif Rp5.000 per pelanggan</small></div></article>
     </section>
-    <section class="actions"><button id="saveBtn" class="primary">Simpan Rekap Hari Ini</button><button id="copyBtn" class="secondary">Salin Rekap</button></section>
+    <section class="actions"><button id="saveBtn" class="primary">Simpan Rekap Hari Ini</button><button id="copyBtn" class="secondary">Salin Rekap</button><button id="resetBtn" class="danger">Reset Input</button></section>
     <section class="history panel"><div class="history-head"><h2>Riwayat Rekap</h2><button id="clearHistory" class="text-btn">Hapus riwayat</button></div><div id="historyList" class="history-list"><p class="empty">Belum ada rekap tersimpan.</p></div></section>
     <nav class="bottom-nav"><button class="active" data-target="top">⌂<span>Beranda</span></button><button data-target="history">◷<span>Riwayat</span></button><button id="navCopy">▢<span>Salin Rekap</span></button></nav>
+    <div id="serviceSheetBackdrop" class="sheet-backdrop" hidden></div>
+    <section id="serviceSheet" class="service-sheet" role="dialog" aria-modal="true" aria-labelledby="serviceSheetTitle" hidden>
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><div><h2 id="serviceSheetTitle">Pilih Menu Servis</h2><p>Pilih jenis layanan yang diberikan</p></div><button id="closeServiceSheet" class="sheet-close" type="button" aria-label="Tutup menu">×</button></div>
+      <div id="serviceOptions" class="service-options"></div>
+    </section>
     <div id="toast" class="toast" role="status"></div>
   </main>
   <script src="app.js"></script>
