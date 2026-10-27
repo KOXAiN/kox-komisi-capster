@@ -2,7 +2,7 @@ function komisiApp() {
   return {
     services: [
       { id: 'potong', name: 'Potong biasa', rate: 0 },
-      { id: 'hairspa', name: 'Hairspa', rate: 5000 },
+      { id: 'hairspa', name: 'Hairspa', rate: 4000 },
       { id: 'premium', name: 'Premium', rate: 17000 },
       { id: 'clasiy', name: 'Clasiy', rate: 21000 },
       { id: 'royal', name: 'Royal', rate: 27000 },
