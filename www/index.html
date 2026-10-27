@@ -1,107 +1,65 @@
-
 <!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b1220">
-  <title>KOX Komisi Capster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>KOMISI CAPSTER BY DOEL</title>
   <link rel="stylesheet" href="theme.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="min-h-screen text-white">
-<main class="max-w-3xl mx-auto px-4 py-7" x-data="komisiApp()">
-  <header class="mb-7">
-    <div class="text-xs tracking-widest text-cyan-300 font-bold mb-2">KOX TOOLS / CAPSTER</div>
-    <h1 class="text-3xl font-black">KOX KOMISI<br><span class="text-cyan-300">CAPSTER</span></h1>
-    <p class="text-slate-400 mt-3">Hitung komisi harian otomatis.</p>
-  </header>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand-mark">KD</div>
+      <div><p class="eyebrow">KALKULATOR KOMISI</p><h1>KOMISI CAPSTER BY DOEL</h1></div>
+    </header>
 
-  <section class="panel rounded-3xl p-5 mb-5">
-    <div class="text-sm text-slate-400">TOTAL KOMISI HARI INI</div>
-    <div class="text-4xl font-black text-cyan-300 mt-2" x-text="rupiah(total)"></div>
-    <div class="flex gap-3 mt-4 flex-wrap">
-      <span class="pill" x-text="customers + ' layanan/customer'"></span>
-      <span class="pill" x-text="'Potong biasa: ' + rupiah(cutTotal)"></span>
-    </div>
-  </section>
+    <section class="panel">
+      <div class="section-heading"><div><p class="eyebrow">01 / POTONGAN</p><h2>Potong Biasa</h2></div><span class="tag">Progresif</span></div>
+      <p class="muted">1–5: Rp5.000 · 6–9: Rp7.500 · 10 ke atas: Rp10.000 per potong</p>
+      <label for="cutQty">Jumlah potong</label>
+      <div class="qty-row"><button class="stepper" type="button" data-step="cutQty" data-delta="-1" aria-label="Kurangi potongan">−</button><input id="cutQty" type="number" inputmode="numeric" min="0" step="1" value="0"><button class="stepper" type="button" data-step="cutQty" data-delta="1" aria-label="Tambah potongan">+</button></div>
+      <div class="amount-row"><span>Komisi potong biasa</span><strong id="cutCommission">Rp0</strong></div>
+    </section>
 
-  <section class="panel rounded-3xl p-5">
-    <div class="flex items-center justify-between mb-5">
-      <div>
-        <h2 class="text-xl font-bold">Input layanan</h2>
-        <p class="text-sm text-slate-400">Total dihitung otomatis.</p>
-      </div>
-      <button @click="reset()" class="reset">Reset</button>
-    </div>
+    <section class="panel">
+      <div class="section-heading"><div><p class="eyebrow">02 / LAYANAN</p><h2>Menu Servis</h2></div><span class="tag">Pilih menu</span></div>
+      <label for="serviceSelect">Jenis servis</label>
+      <select id="serviceSelect">
+        <option value="hairspa">Hairspa — Rp5.000</option>
+        <option value="premium">Premium — Rp17.000</option>
+        <option value="clasiy">Clasiy — Rp21.000</option>
+        <option value="royal">Royal — Rp27.000</option>
+        <option value="perming">Perming — Rp50.000</option>
+        <option value="smoothing">Smoothing — Rp50.000</option>
+      </select>
+      <label for="serviceQty">Jumlah pelanggan untuk servis terpilih</label>
+      <div class="qty-row"><button class="stepper" type="button" data-step="serviceQty" data-delta="-1" aria-label="Kurangi jumlah servis">−</button><input id="serviceQty" type="number" inputmode="numeric" min="0" step="1" value="0"><button class="stepper" type="button" data-step="serviceQty" data-delta="1" aria-label="Tambah jumlah servis">+</button></div>
+      <div class="amount-row"><span id="selectedServiceLabel">Komisi Hairspa</span><strong id="selectedServiceCommission">Rp0</strong></div>
+      <p class="hint">Jumlah tiap menu tersimpan sendiri. Ganti dropdown untuk memasukkan servis lain tanpa menghapus jumlah sebelumnya.</p>
+      <div id="serviceBreakdown" class="breakdown" aria-live="polite"></div>
+    </section>
 
-    <div class="space-y-3">
-      <template x-for="item in services" :key="item.id">
-        <div class="service-row">
-          <div class="min-w-0 flex-1">
-            <div class="font-semibold" x-text="item.name"></div>
-            <div class="text-xs text-slate-400 mt-1"
-              x-text="item.id === 'potong' ? cutRateLabel : rupiah(item.rate) + ' / customer'"></div>
-          </div>
-          <input type="number" min="0" step="1" inputmode="numeric"
-            class="count" :aria-label="'Jumlah ' + item.name"
-            x-model.number="counts[item.id]" @input="clean(item.id)">
-          <div class="text-right w-28">
-            <div class="text-xs text-slate-500">Komisi</div>
-            <div class="font-bold text-cyan-300"
-              x-text="rupiah(item.id === 'potong' ? cutTotal : item.rate * count(item.id))"></div>
-          </div>
-        </div>
-      </template>
-    </div>
+    <section class="total-card">
+      <p class="eyebrow">TOTAL KOMISI HARI INI</p><strong id="grandTotal">Rp0</strong>
+      <div class="total-split"><span>Potong biasa <b id="cutTotalSmall">Rp0</b></span><span>Menu servis <b id="serviceTotalSmall">Rp0</b></span></div>
+    </section>
 
-    <div class="border-t border-slate-700 mt-6 pt-5">
-      <div class="flex justify-between items-center">
-        <div>
-          <div class="font-bold">TOTAL KOMISI</div>
-          <div class="text-sm text-slate-400" x-text="customers + ' customer tercatat'"></div>
-        </div>
-        <div class="text-2xl font-black text-cyan-300" x-text="rupiah(total)"></div>
-      </div>
-      <button class="primary w-full mt-5" @click="saveDay()">Simpan rekap hari ini</button>
-      <button class="secondary w-full mt-3" @click="exportSummary()">Salin rekap</button>
-      <p class="text-xs text-slate-400 mt-3" x-show="notice" x-text="notice"></p>
-    </div>
-  </section>
+    <section class="panel">
+      <div class="section-heading"><div><p class="eyebrow">03 / REKAP</p><h2>Simpan hasil</h2></div></div>
+      <label for="entryDate">Tanggal rekap</label><input id="entryDate" type="date">
+      <label for="entryNote">Catatan (opsional)</label><input id="entryNote" type="text" placeholder="Contoh: shift sore">
+      <button id="saveBtn" class="primary-btn" type="button">Simpan Rekap Harian</button>
+      <button id="copyBtn" class="secondary-btn" type="button">Salin Ringkasan</button>
+      <p id="statusMessage" class="status" role="status"></p>
+    </section>
 
-  <section class="panel rounded-3xl p-5 mt-5">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h2 class="text-xl font-bold">Riwayat rekap</h2>
-        <p class="text-sm text-slate-400">Tersimpan di perangkat ini.</p>
-      </div>
-      <button class="reset" @click="clearHistory()" x-show="history.length">Hapus riwayat</button>
-    </div>
-    <template x-if="!history.length">
-      <p class="text-sm text-slate-500">Belum ada rekap tersimpan.</p>
-    </template>
-    <div class="space-y-3">
-      <template x-for="(entry,i) in history" :key="entry.id">
-        <div class="history-row">
-          <div>
-            <div class="font-semibold" x-text="entry.date"></div>
-            <div class="text-xs text-slate-400" x-text="entry.customers + ' customer'"></div>
-          </div>
-          <div class="font-bold text-cyan-300" x-text="rupiah(entry.total)"></div>
-          <button class="reset" @click="loadEntry(i)">Lihat</button>
-        </div>
-      </template>
-    </div>
-  </section>
-
-  <section class="mt-5 text-xs text-slate-400 leading-relaxed">
-    <h3 class="font-bold mb-2">Aturan potong biasa</h3>
-    <p>1–5 customer: Rp5.000/potong · 6–10: Rp7.500/potong · 11 ke atas: Rp10.000/potong.</p>
-    <p class="mt-2">Hairspa Rp5.000 · Premium Rp17.000 · Clasiy Rp21.000 · Royal Rp27.000 · Perming Rp50.000 · Smoothing Rp50.000.</p>
-  </section>
-  <footer class="text-center text-xs text-slate-500 mt-8">KOX TOOLS · Dibuat buat kerja capster</footer>
-</main>
-<script src="app.js"></script>
+    <section class="panel">
+      <div class="section-heading"><div><p class="eyebrow">04 / RIWAYAT</p><h2>Rekap tersimpan</h2></div><button id="clearHistoryBtn" class="text-btn" type="button">Hapus riwayat</button></div>
+      <div id="historyList" class="history-list"><p class="muted">Belum ada rekap tersimpan.</p></div>
+    </section>
+    <footer>Data tersimpan di perangkat ini.</footer>
+  </main>
+  <script src="app.js"></script>
 </body>
 </html>
