@@ -1,119 +1,67 @@
 (() => {
-  'use strict';
-  const RATES = { hairspa: 5000, premium: 17000, clasiy: 21000, royal: 27000, perming: 50000, smoothing: 50000 };
-  const NAMES = { hairspa: 'Hairspa', premium: 'Premium', clasiy: 'Clasiy', royal: 'Royal', perming: 'Perming', smoothing: 'Smoothing' };
-  const STORAGE_KEY = 'koxKomisiCapsterDataV2';
-  const LEGACY_KEYS = ['koxKomisiCapsterData', 'komisiCapsterData', 'capsterHistory'];
   const $ = id => document.getElementById(id);
-  const money = n => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Math.max(0, Math.round(Number(n) || 0)));
-  const safeQty = n => Math.max(0, Math.floor(Number(n) || 0));
-  const freshCounts = () => Object.fromEntries(Object.keys(RATES).map(k => [k, 0]));
-  let serviceCounts = freshCounts();
+  const rates = { Hairspa: 5000, Premium: 17000, Clasiy: 21000, Royal: 27000, Perming: 50000, Smoothing: 50000 };
+  const storageKey = 'koxCapsterDailyV2';
+  let serviceCounts = {};
   let history = loadHistory();
-
-  function cutCommission(qty) {
-    qty = safeQty(qty);
-    return Math.min(qty, 5) * 5000 + Math.max(0, Math.min(qty - 5, 4)) * 7500 + Math.max(0, qty - 9) * 10000;
-  }
-  function serviceCommission(counts) {
-    return Object.keys(RATES).reduce((sum, key) => sum + safeQty(counts[key]) * RATES[key], 0);
-  }
-  function totalFor(data) { return cutCommission(data.cutQty) + serviceCommission(data.serviceCounts || {}); }
-  function snapshot() {
-    return { date: $('entryDate').value || today(), note: $('entryNote').value.trim(), cutQty: safeQty($('cutQty').value), serviceCounts: { ...serviceCounts } };
-  }
-  function today() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-  function loadHistory() {
-    let raw = null;
-    try { raw = localStorage.getItem(STORAGE_KEY); } catch (_) {}
-    if (!raw) {
-      for (const key of LEGACY_KEYS) { try { raw = localStorage.getItem(key); if (raw) break; } catch (_) {} }
-    }
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw);
-      const rows = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.history) ? parsed.history : []);
-      return rows.map((item, i) => {
-        const old = item.serviceCounts || item.counts || {};
-        const counts = freshCounts();
-        Object.keys(counts).forEach(k => counts[k] = safeQty(old[k]));
-        return { id: item.id || `${Date.now()}-${i}`, date: item.date || today(), note: item.note || '', cutQty: safeQty(item.cutQty ?? old.potong ?? old['Potong Biasa'] ?? 0), serviceCounts: counts };
-      });
-    } catch (_) { return []; }
-  }
-  function persistHistory() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history)); return true; } catch (_) { return false; }
-  }
-  function renderBreakdown() {
-    const host = $('serviceBreakdown');
-    const used = Object.keys(RATES).filter(k => safeQty(serviceCounts[k]) > 0);
-    if (!used.length) { host.innerHTML = ''; return; }
-    host.innerHTML = used.map(k => `<div class="breakdown-row"><span>${NAMES[k]} · ${safeQty(serviceCounts[k])} pelanggan</span><span>${money(safeQty(serviceCounts[k]) * RATES[k])}</span></div>`).join('');
-  }
+  const today = new Date();
+  const localDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  $('recapDate').value = localDate;
+  function money(n) { return 'Rp' + Math.max(0, Math.round(n || 0)).toLocaleString('id-ID'); }
+  function num(id) { return Math.max(0, Math.floor(Number($(id).value) || 0)); }
+  function cutCommission(q) { let total=0; for(let i=1;i<=q;i++) total += i<=5 ? 5000 : i<=9 ? 7500 : 10000; return total; }
+  function loadHistory() { try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch (_) { return []; } }
+  function saveHistory() { localStorage.setItem(storageKey, JSON.stringify(history)); }
+  function currentService() { return $('serviceType').value; }
+  function serviceTotalFor(name) { return (Number(serviceCounts[name]) || 0) * rates[name]; }
+  function totalServices() { return Object.keys(rates).reduce((s,name)=>s+serviceTotalFor(name),0); }
   function render() {
-    const cutQty = safeQty($('cutQty').value);
-    const selected = $('serviceSelect').value;
-    $('cutCommission').textContent = money(cutCommission(cutQty));
-    $('serviceQty').value = safeQty(serviceCounts[selected]);
-    $('selectedServiceLabel').textContent = `Komisi ${NAMES[selected]} (${money(RATES[selected])}/pelanggan)`;
-    $('selectedServiceCommission').textContent = money(safeQty(serviceCounts[selected]) * RATES[selected]);
-    $('cutTotalSmall').textContent = money(cutCommission(cutQty));
-    $('serviceTotalSmall').textContent = money(serviceCommission(serviceCounts));
-    $('grandTotal').textContent = money(cutCommission(cutQty) + serviceCommission(serviceCounts));
-    renderBreakdown();
+    const cuts = cutCommission(num('cutCount'));
+    const svcName = currentService();
+    const svcCommission = serviceTotalFor(svcName);
+    $('cutCommission').textContent = money(cuts);
+    $('serviceCommission').textContent = money(svcCommission);
+    $('serviceCommissionLabel').textContent = `Komisi ${svcName}`;
+    $('serviceRate').textContent = `Tarif ${money(rates[svcName])} per pelanggan`;
+    $('cutTotal').textContent = money(cuts);
+    $('serviceTotal').textContent = money(totalServices());
+    $('totalToday').textContent = money(cuts + totalServices());
+    $('serviceCount').value = Number(serviceCounts[svcName]) || 0;
     renderHistory();
   }
-  function summary(data) {
-    const lines = [`KOMISI CAPSTER BY DOEL`, `Tanggal: ${data.date}${data.note ? ` · ${data.note}` : ''}`, '', `Potong Biasa: ${safeQty(data.cutQty)} potong — ${money(cutCommission(data.cutQty))}`, 'Menu Servis:'];
-    let any = false;
-    Object.keys(RATES).forEach(k => { const q = safeQty((data.serviceCounts || {})[k]); if (q) { any = true; lines.push(`- ${NAMES[k]}: ${q} pelanggan × ${money(RATES[k])} = ${money(q * RATES[k])}`); } });
-    if (!any) lines.push('- Belum ada servis');
-    lines.push('', `TOTAL KOMISI: ${money(totalFor(data))}`);
-    return lines.join('\n');
+  function snapshot() { return { date: $('recapDate').value || localDate, cutCount: num('cutCount'), serviceCounts: {...serviceCounts}, total: cutCommission(num('cutCount'))+totalServices(), savedAt: new Date().toISOString() }; }
+  function summaryText(item=snapshot()) {
+    const lines = [`KOMISI CAPSTER BY DOEL`, `Tanggal: ${item.date}`, `Potong biasa (${item.cutCount} potong): ${money(cutCommission(item.cutCount))}`];
+    Object.keys(rates).forEach(name => { const q=Number(item.serviceCounts?.[name])||0; if(q>0) lines.push(`${name} (${q} pelanggan): ${money(q*rates[name])}`); });
+    lines.push(`TOTAL KOMISI: ${money(item.total)}`); return lines.join('\n');
   }
+  function toast(msg) { const el=$('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200); }
   function renderHistory() {
-    const host = $('historyList');
-    if (!history.length) { host.innerHTML = '<p class="muted">Belum ada rekap tersimpan.</p>'; return; }
-    host.innerHTML = history.slice().reverse().map(item => `<article class="history-item"><div class="history-head"><span>${escapeHtml(item.date)}${item.note ? ` · ${escapeHtml(item.note)}` : ''}</span><span class="history-total">${money(totalFor(item))}</span></div><div class="history-detail">${escapeHtml(summary(item))}</div><div class="history-actions"><button type="button" data-action="load" data-id="${escapeHtml(item.id)}">Muat lagi</button><button type="button" data-action="copy" data-id="${escapeHtml(item.id)}">Salin</button><button type="button" data-action="delete" data-id="${escapeHtml(item.id)}">Hapus</button></div></article>`).join('');
+    const root=$('historyList'); root.innerHTML='';
+    if(!history.length){ root.innerHTML='<p class="empty">Belum ada rekap tersimpan.</p>'; return; }
+    history.slice().reverse().forEach((item,revIndex)=>{
+      const row=document.createElement('div'); row.className='history-item';
+      const info=document.createElement('div'); const title=document.createElement('strong'); title.textContent=item.date || 'Tanggal tidak diketahui';
+      const detail=document.createElement('small'); detail.textContent=`Total ${money(item.total)}`; info.append(title,detail);
+      const btn=document.createElement('button'); btn.textContent='Muat'; btn.addEventListener('click',()=>{ $('recapDate').value=item.date || localDate; $('cutCount').value=item.cutCount ?? item.counts?.potong ?? 0; serviceCounts={...(item.serviceCounts||{})}; if(item.counts){Object.keys(rates).forEach(k=>{if(serviceCounts[k]===undefined)serviceCounts[k]=item.counts[k]||0;});} $('serviceCount').value=serviceCounts[currentService()]||0; render(); window.scrollTo({top:0,behavior:'smooth'}); toast('Rekap dimuat'); });
+      row.append(info,btn); root.append(row);
+    });
   }
-  function escapeHtml(value) { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  async function copyText(text) {
-    try { await navigator.clipboard.writeText(text); showStatus('Ringkasan berhasil disalin.'); }
-    catch (_) { const area = document.createElement('textarea'); area.value = text; area.style.position = 'fixed'; area.style.opacity = '0'; document.body.appendChild(area); area.select(); try { document.execCommand('copy'); showStatus('Ringkasan disalin.'); } catch (_) { showStatus('Gagal menyalin otomatis.'); } area.remove(); }
-  }
-  function showStatus(message) { $('statusMessage').textContent = message; }
-  $('entryDate').value = today();
-  $('cutQty').addEventListener('input', render);
-  $('serviceSelect').addEventListener('change', render);
-  $('serviceQty').addEventListener('input', () => { serviceCounts[$('serviceSelect').value] = safeQty($('serviceQty').value); render(); });
-  document.querySelectorAll('[data-step]').forEach(btn => btn.addEventListener('click', () => {
-    const id = btn.dataset.step, delta = Number(btn.dataset.delta);
-    if (id === 'cutQty') $('cutQty').value = safeQty($('cutQty').value) + delta;
-    else { const key = $('serviceSelect').value; serviceCounts[key] = Math.max(0, safeQty(serviceCounts[key]) + delta); }
-    render();
-  }));
-  $('saveBtn').addEventListener('click', () => {
-    const item = snapshot(); item.id = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-    history.push(item);
-    if (persistHistory()) showStatus('Rekap harian berhasil disimpan.'); else { history.pop(); showStatus('Penyimpanan gagal. Periksa ruang penyimpanan perangkat.'); }
-    render();
-  });
-  $('copyBtn').addEventListener('click', () => copyText(summary(snapshot())));
-  $('historyList').addEventListener('click', event => {
-    const btn = event.target.closest('button[data-action]'); if (!btn) return;
-    const item = history.find(row => String(row.id) === btn.dataset.id); if (!item) return;
-    if (btn.dataset.action === 'copy') copyText(summary(item));
-    if (btn.dataset.action === 'load') {
-      $('entryDate').value = item.date || today(); $('entryNote').value = item.note || ''; $('cutQty').value = safeQty(item.cutQty); serviceCounts = { ...freshCounts(), ...(item.serviceCounts || {}) }; render(); showStatus('Rekap dimuat ke kalkulator.'); window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    if (btn.dataset.action === 'delete' && confirm('Hapus rekap ini?')) { history = history.filter(row => String(row.id) !== btn.dataset.id); persistHistory(); render(); showStatus('Rekap dihapus.'); }
-  });
-  $('clearHistoryBtn').addEventListener('click', () => {
-    if (!history.length) { showStatus('Riwayat masih kosong.'); return; }
-    if (confirm('Hapus semua riwayat rekap?')) { history = []; persistHistory(); render(); showStatus('Semua riwayat dihapus.'); }
-  });
+  function updateServiceCount(delta=0) { const name=currentService(); serviceCounts[name]=Math.max(0,(Number(serviceCounts[name])||0)+delta); $('serviceCount').value=serviceCounts[name]; render(); }
+  $('cutCount').addEventListener('input',render);
+  $('cutMinus').addEventListener('click',()=>{ $('cutCount').value=Math.max(0,num('cutCount')-1); render(); });
+  $('cutPlus').addEventListener('click',()=>{ $('cutCount').value=num('cutCount')+1; render(); });
+  $('serviceType').addEventListener('change',render);
+  $('serviceCount').addEventListener('input',()=>{serviceCounts[currentService()]=num('serviceCount');render();});
+  $('serviceMinus').addEventListener('click',()=>updateServiceCount(-1));
+  $('servicePlus').addEventListener('click',()=>updateServiceCount(1));
+  $('saveBtn').addEventListener('click',()=>{ const item=snapshot(); const idx=history.findIndex(h=>h.date===item.date); if(idx>=0) history[idx]=item; else history.push(item); saveHistory(); renderHistory(); toast('Rekap berhasil disimpan'); });
+  async function copySummary(){try{await navigator.clipboard.writeText(summaryText());toast('Rekap berhasil disalin');}catch(_){const ta=document.createElement('textarea');ta.value=summaryText();document.body.append(ta);ta.select();try{document.execCommand('copy');toast('Rekap berhasil disalin');}catch(e){toast('Gagal menyalin rekap');}ta.remove();}}
+  $('copyBtn').addEventListener('click',copySummary); $('navCopy').addEventListener('click',copySummary);
+  $('clearHistory').addEventListener('click',()=>{if(confirm('Hapus semua riwayat rekap?')){history=[];saveHistory();renderHistory();toast('Riwayat dihapus');}});
+  $('settingsBtn').addEventListener('click',()=>toast('Tarif komisi mengikuti aturan aplikasi'));
+  document.querySelectorAll('.bottom-nav [data-target]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');window.scrollTo({top:btn.dataset.target==='history'?document.body.scrollHeight:0,behavior:'smooth'});}));
+  // Restore legacy history format if it exists.
+  try { const old=JSON.parse(localStorage.getItem('koxKomisiHistory')||'null'); if(Array.isArray(old)&&history.length===0){history=old.map(h=>({date:h.date||h.tanggal||localDate,cutCount:h.cutCount??h.counts?.potong??0,serviceCounts:h.serviceCounts||h.counts||{},total:h.total||0}));saveHistory();} } catch(_){}
   render();
 })();

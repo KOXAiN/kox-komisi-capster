@@ -1,65 +1,25 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <title>KOMISI CAPSTER BY DOEL</title>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07101f"><title>Komisi Capster by Doel</title>
   <link rel="stylesheet" href="theme.css">
 </head>
 <body>
   <main class="app">
-    <header class="topbar">
-      <div class="brand-mark">KD</div>
-      <div><p class="eyebrow">KALKULATOR KOMISI</p><h1>KOMISI CAPSTER BY DOEL</h1></div>
-    </header>
-
-    <section class="panel">
-      <div class="section-heading"><div><p class="eyebrow">01 / POTONGAN</p><h2>Potong Biasa</h2></div><span class="tag">Progresif</span></div>
-      <p class="muted">1–5: Rp5.000 · 6–9: Rp7.500 · 10 ke atas: Rp10.000 per potong</p>
-      <label for="cutQty">Jumlah potong</label>
-      <div class="qty-row"><button class="stepper" type="button" data-step="cutQty" data-delta="-1" aria-label="Kurangi potongan">−</button><input id="cutQty" type="number" inputmode="numeric" min="0" step="1" value="0"><button class="stepper" type="button" data-step="cutQty" data-delta="1" aria-label="Tambah potongan">+</button></div>
-      <div class="amount-row"><span>Komisi potong biasa</span><strong id="cutCommission">Rp0</strong></div>
+    <header class="app-header"><div class="brand-icon">✂</div><div><h1>KOMISI <span>CAPSTER</span></h1><p>BY DOEL</p></div><button id="settingsBtn" class="icon-btn" aria-label="Pengaturan">⚙</button></header>
+    <section class="summary gradient">
+      <div class="summary-total"><p>TOTAL KOMISI HARI INI</p><strong id="totalToday">Rp0</strong><div class="summary-split"><div>Potong biasa<strong id="cutTotal">Rp0</strong></div><div>Menu servis<strong id="serviceTotal">Rp0</strong></div></div></div>
+      <div class="date-area"><label for="recapDate">TANGGAL REKAP</label><input id="recapDate" type="date"></div>
     </section>
-
-    <section class="panel">
-      <div class="section-heading"><div><p class="eyebrow">02 / LAYANAN</p><h2>Menu Servis</h2></div><span class="tag">Pilih menu</span></div>
-      <label for="serviceSelect">Jenis servis</label>
-      <select id="serviceSelect">
-        <option value="hairspa">Hairspa — Rp5.000</option>
-        <option value="premium">Premium — Rp17.000</option>
-        <option value="clasiy">Clasiy — Rp21.000</option>
-        <option value="royal">Royal — Rp27.000</option>
-        <option value="perming">Perming — Rp50.000</option>
-        <option value="smoothing">Smoothing — Rp50.000</option>
-      </select>
-      <label for="serviceQty">Jumlah pelanggan untuk servis terpilih</label>
-      <div class="qty-row"><button class="stepper" type="button" data-step="serviceQty" data-delta="-1" aria-label="Kurangi jumlah servis">−</button><input id="serviceQty" type="number" inputmode="numeric" min="0" step="1" value="0"><button class="stepper" type="button" data-step="serviceQty" data-delta="1" aria-label="Tambah jumlah servis">+</button></div>
-      <div class="amount-row"><span id="selectedServiceLabel">Komisi Hairspa</span><strong id="selectedServiceCommission">Rp0</strong></div>
-      <p class="hint">Jumlah tiap menu tersimpan sendiri. Ganti dropdown untuk memasukkan servis lain tanpa menghapus jumlah sebelumnya.</p>
-      <div id="serviceBreakdown" class="breakdown" aria-live="polite"></div>
+    <section class="panels">
+      <article class="panel"><div class="panel-title"><span class="number lime">01</span><h2>Potong Biasa</h2></div><label for="cutCount">Jumlah potong</label><div class="counter"><button id="cutMinus" aria-label="Kurangi potong">−</button><input id="cutCount" type="number" min="0" inputmode="numeric" value="0"><button id="cutPlus" aria-label="Tambah potong">+</button></div><div class="commission"><span>Komisi potong biasa</span><strong id="cutCommission">Rp0</strong><small>1–5: Rp5.000 · 6–9: Rp7.500 · 10+: Rp10.000 per potong</small></div></article>
+      <article class="panel"><div class="panel-title"><span class="number blue">02</span><h2>Menu Servis</h2></div><label for="serviceType">Jenis servis</label><select id="serviceType"><option value="Hairspa">Hairspa</option><option value="Premium">Premium</option><option value="Clasiy">Clasiy</option><option value="Royal">Royal</option><option value="Perming">Perming</option><option value="Smoothing">Smoothing</option></select><label for="serviceCount">Jumlah pelanggan</label><div class="counter"><button id="serviceMinus" aria-label="Kurangi pelanggan">−</button><input id="serviceCount" type="number" min="0" inputmode="numeric" value="0"><button id="servicePlus" aria-label="Tambah pelanggan">+</button></div><div class="commission"><span id="serviceCommissionLabel">Komisi Hairspa</span><strong id="serviceCommission">Rp0</strong><small id="serviceRate">Tarif Rp5.000 per pelanggan</small></div></article>
     </section>
-
-    <section class="total-card">
-      <p class="eyebrow">TOTAL KOMISI HARI INI</p><strong id="grandTotal">Rp0</strong>
-      <div class="total-split"><span>Potong biasa <b id="cutTotalSmall">Rp0</b></span><span>Menu servis <b id="serviceTotalSmall">Rp0</b></span></div>
-    </section>
-
-    <section class="panel">
-      <div class="section-heading"><div><p class="eyebrow">03 / REKAP</p><h2>Simpan hasil</h2></div></div>
-      <label for="entryDate">Tanggal rekap</label><input id="entryDate" type="date">
-      <label for="entryNote">Catatan (opsional)</label><input id="entryNote" type="text" placeholder="Contoh: shift sore">
-      <button id="saveBtn" class="primary-btn" type="button">Simpan Rekap Harian</button>
-      <button id="copyBtn" class="secondary-btn" type="button">Salin Ringkasan</button>
-      <p id="statusMessage" class="status" role="status"></p>
-    </section>
-
-    <section class="panel">
-      <div class="section-heading"><div><p class="eyebrow">04 / RIWAYAT</p><h2>Rekap tersimpan</h2></div><button id="clearHistoryBtn" class="text-btn" type="button">Hapus riwayat</button></div>
-      <div id="historyList" class="history-list"><p class="muted">Belum ada rekap tersimpan.</p></div>
-    </section>
-    <footer>Data tersimpan di perangkat ini.</footer>
+    <section class="actions"><button id="saveBtn" class="primary">Simpan Rekap Hari Ini</button><button id="copyBtn" class="secondary">Salin Rekap</button></section>
+    <section class="history panel"><div class="history-head"><h2>Riwayat Rekap</h2><button id="clearHistory" class="text-btn">Hapus riwayat</button></div><div id="historyList" class="history-list"><p class="empty">Belum ada rekap tersimpan.</p></div></section>
+    <nav class="bottom-nav"><button class="active" data-target="top">⌂<span>Beranda</span></button><button data-target="history">◷<span>Riwayat</span></button><button id="navCopy">▢<span>Salin Rekap</span></button></nav>
+    <div id="toast" class="toast" role="status"></div>
   </main>
   <script src="app.js"></script>
-</body>
-</html>
+</body></html>
