@@ -45,9 +45,16 @@ function komisiApp() {
       return this.rupiah(this.cutRate) + ' / potong (' + tier + ' customer)';
     },
 
-    get cutTotal() {
-      return this.count('potong') * this.cutRate;
-    },
+    
+get cutTotal() {
+  const n = this.count('potong');
+
+  const tarif5000 = Math.min(n, 5) * 5000;
+  const tarif7500 = Math.min(Math.max(n - 5, 0), 4) * 7500;
+  const tarif10000 = Math.max(n - 9, 0) * 10000;
+
+  return tarif5000 + tarif7500 + tarif10000;
+},
 
     get customers() {
       return this.services.reduce((sum, s) => sum + this.count(s.id), 0);
