@@ -1,6 +1,6 @@
 (() => {
   const $ = id => document.getElementById(id);
-  const rates = { Hairspa: 5000, Premium: 17000, Clasiy: 21000, Royal: 27000, Perming: 50000, Smoothing: 50000 };
+  const rates = { Hairspa: 4000, Premium: 17000, Clasiy: 21000, Royal: 27000, Perming: 50000, Smoothing: 50000 };
   const storageKey = 'koxCapsterDailyV2';
   let serviceCounts = {};
   let history = loadHistory();
