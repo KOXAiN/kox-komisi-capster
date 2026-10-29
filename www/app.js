@@ -1,6 +1,6 @@
 (() => {
   const $ = id => document.getElementById(id);
-  const rates = { Hairspa: 4000, Premium: 17000, Clasiy: 21000, Royal: 27000, Perming: 50000, Smoothing: 50000 };
+  const rates = { Hairspa: 4000, Blackhade: 3000, Premium: 17000, Clasiy: 21000, Royal: 27000, Perming: 50000, Smoothing: 50000 };
   const storageKey = 'koxCapsterDailyV2';
   let serviceCounts = {};
   let history = loadHistory();
@@ -13,7 +13,7 @@
   function loadHistory() { try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch (_) { return []; } }
   function saveHistory() { localStorage.setItem(storageKey, JSON.stringify(history)); }
   let selectedService = 'Hairspa';
-  const serviceMeta = { Hairspa: ['✦','linear-gradient(135deg,#a78bfa,#6d28d9)'], Premium: ['◆','linear-gradient(135deg,#60a5fa,#1d4ed8)'], Clasiy: ['✿','linear-gradient(135deg,#f9a8d4,#db2777)'], Royal: ['✧','linear-gradient(135deg,#fdba74,#c2410c)'], Perming: ['◉','linear-gradient(135deg,#5eead4,#0f766e)'], Smoothing: ['✦','linear-gradient(135deg,#67e8f9,#0284c7)'] };
+  const serviceMeta = { Hairspa: ['✦','linear-gradient(135deg,#a78bfa,#6d28d9)'], Blackhade: ['●','linear-gradient(135deg,#9ca3af,#374151)'], Premium: ['◆','linear-gradient(135deg,#60a5fa,#1d4ed8)'], Clasiy: ['✿','linear-gradient(135deg,#f9a8d4,#db2777)'], Royal: ['✧','linear-gradient(135deg,#fdba74,#c2410c)'], Perming: ['◉','linear-gradient(135deg,#5eead4,#0f766e)'], Smoothing: ['✦','linear-gradient(135deg,#67e8f9,#0284c7)'] };
   function currentService() { return selectedService; }
   function serviceTotalFor(name) { return (Number(serviceCounts[name]) || 0) * rates[name]; }
   function totalServices() { return Object.keys(rates).reduce((s,name)=>s+serviceTotalFor(name),0); }
